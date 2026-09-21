@@ -34,15 +34,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Generate SBOM (CycloneDX)
+      - name: Generate SBOM (SPDX)
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           path: .
-          format: cyclonedx-json
-          output-file: sbom.cyclonedx.json
+          format: spdx-json
+          output-file: sbom.spdx.json
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom
-          path: sbom.cyclonedx.json
+          path: sbom.spdx.json
+
+      - name: Scan SBOM for known vulnerabilities (Grype)
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7
+        with:
+          sbom: sbom.spdx.json
+          fail-build: true
+          severity-cutoff: medium
